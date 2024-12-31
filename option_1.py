@@ -1,24 +1,24 @@
 import cv2
-import numpy as np
 import pandas as pd
 from ultralytics import YOLO
 import math
-from Conf import *
-from Centroid_Info import *
+from common import *
 
-def getCoordsConf(results):
+def get_coords_conf(results):
 
     data = results[0].boxes.data.numpy().tolist()
     labels = ['x1', 'y1', 'x2', 'y2', 'confidence', 'class']
-    pd_frame = pd.DataFrame(data, columns=labels, dtype='float')
+    pd_frame = pd.DataFrame(data, columns = labels, dtype = 'float')
     pd_frame = pd_frame[pd_frame['class'] == 0.0]
-    pd_frame.drop('class', axis=1, inplace=True)
+    pd_frame = pd_frame[pd_frame['confidence'] >= conf.confidence]
+    pd_frame.drop('class', axis = 1, inplace = True)
+    pd_frame.drop('confidence', axis = 1, inplace = True)
 
     return pd_frame
 
 def paint(frame):
     for id, center in centroid_info.object_centers.items():
-        cv2.circle(frame, center, 5, (0, 255, 0), -1)
+        cv2.circle(frame, center, conf.font_thickness, conf.boxes, -1)
         (text_width, text_height), _ = cv2.getTextSize(str(id), conf.font, conf.font_size, conf.font_thickness)
         text_x = (center[0] - text_width) // 2
         text_y = (center[1] - text_height) // 2
@@ -28,7 +28,7 @@ def paint(frame):
 
     cv2.imshow("Video", frame)
 
-def startModelCamera():
+def start_model_camera():
     cap = cv2.VideoCapture(conf.camera)
 
     model=YOLO(conf.model)
@@ -39,7 +39,7 @@ def startModelCamera():
 
     return model, cap
 
-def alreadyInPastFrame(new_center):
+def already_in_past_frame(new_center):
 
     for id, center in centroid_info.object_centers.items():
         dist = math.hypot(new_center[0] - center[0], new_center[1] - center[1])
@@ -48,9 +48,9 @@ def alreadyInPastFrame(new_center):
         
     return False, -1
 
-def getCenters(pd_frame):
+def get_centers(pd_frame):
 
-    activeIds = set()
+    active_ids = set()
 
     for _, row in pd_frame.iterrows():
         center_x = (int(row['x1']) + int(row['x2'])) // 2
@@ -58,19 +58,19 @@ def getCenters(pd_frame):
 
         new_center = (center_x, center_y)
 
-        alreadyIn = alreadyInPastFrame(new_center)
+        alreadyIn = already_in_past_frame(new_center)
 
         if not alreadyIn[0]:
             centroid_info.object_centers[centroid_info.id_count] = new_center
-            activeIds.add(centroid_info.id_count)
+            active_ids.add(centroid_info.id_count)
             centroid_info.id_count += 1
         else:
             centroid_info.object_centers[alreadyIn[1]] = new_center
-            activeIds.add(alreadyIn[1])
+            active_ids.add(alreadyIn[1])
 
     to_delete = set()
     for key in centroid_info.object_centers.keys():
-        if key not in activeIds:
+        if key not in active_ids:
             to_delete.add(key)
     
     for key in to_delete:
@@ -81,7 +81,7 @@ def getCenters(pd_frame):
 
 def main():
 
-    model, cap = startModelCamera()
+    model, cap = start_model_camera()
 
     count = 0
 
@@ -94,16 +94,16 @@ def main():
             exit()
 
         count += 1
-        if conf.skipFrames != 0 and count % conf.skipFrames != 0:
+        if conf.skip_frames != 0 and count % conf.skip_frames != 0:
             continue
 
-        frame = cv2.resize(frame, (600, 480))
+        #frame = cv2.resize(frame, (600, 480))
 
-        results=model.predict(frame, verbose=False)
+        results=model.predict(frame, verbose = False)
         
-        pd_frame = getCoordsConf(results)
+        pd_frame = get_coords_conf(results)
 
-        getCenters(pd_frame)
+        get_centers(pd_frame)
 
         paint(frame)
         
@@ -115,7 +115,7 @@ def main():
     cap.release()
     cv2.destroyAllWindows()
 
-conf = Conf(camera = 0, distance = 70, skipFrames = 7, model = 'yolov3-tinyu.pt')
+conf = Conf(camera = 0, skip_frames = 0, model = 'yolov8s.pt', confidence = 0.5)
 centroid_info = Centroid_Info()
 
 main()
