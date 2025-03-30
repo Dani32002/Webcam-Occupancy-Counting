@@ -59,7 +59,8 @@ def main():
             print("Error retrieving frame")
             exit()
 
-        cv2.imshow("Video", frame)
+        if conf.show_camera:
+            cv2.imshow("Video", frame)
 
         count += 1
         if conf.skip_frames != 0 and count % conf.skip_frames != 0:
@@ -71,7 +72,7 @@ def main():
         
         pd_frame = get_coords_conf(results)
 
-        print(pd_frame.shape[0])
+        print(pd_frame.shape[0], " personas")
         #paint(frame, pd_frame)
         
         #cv2.imshow("Video", frame)
@@ -85,7 +86,8 @@ def main():
 model_ref = input("Insert the Ultralytics model string: ")
 skip_frames = int(input("Pick a number of frames to skip: "))
 fps = int(input("Pick a number of fps for the camera: "))
+show_camera = True if input("Show camera? (1,0): ") == "1" else False
 
-conf = Conf(fps = fps, camera = 0, distance = 120, skip_frames = skip_frames, model = model_ref, confidence = 0.5, font_color = (255, 255, 255), font_thickness = 3)
+conf = Conf(show_camera = show_camera, fps = fps, camera = 0, distance = 120, skip_frames = skip_frames, model = model_ref, confidence = 0.5, font_color = (255, 255, 255), font_thickness = 3)
 
 main()

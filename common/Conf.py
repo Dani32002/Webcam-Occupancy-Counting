@@ -2,7 +2,7 @@ import cv2
 
 class Conf():
 
-    def __init__(self, skip_frames, model, camera, confidence, distance = 100, font = cv2.FONT_HERSHEY_SIMPLEX, font_size = 1, font_color = (0, 255, 0), font_thickness = 5, backgrounds = (255, 0, 0), boxes = (0, 0, 255), label_offset = 50, fps = 30):
+    def __init__(self, skip_frames, model, camera, confidence, distance = 100, font = cv2.FONT_HERSHEY_SIMPLEX, font_size = 1, font_color = (0, 255, 0), font_thickness = 5, backgrounds = (255, 0, 0), boxes = (0, 0, 255), label_offset = 50, fps = 30, show_camera = True):
         self.camera = camera
         self.distance = distance
         self.skip_frames = skip_frames
@@ -15,4 +15,5 @@ class Conf():
         self.backgrounds = backgrounds
         self.boxes = boxes
         self.label_offset = label_offset,
-        self.fps = fps
+        self.fps = fps,
+        self.show_camera = show_camera
