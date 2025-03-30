@@ -39,6 +39,10 @@ def start_model_camera():
         print("Error: Could not open webcam.")
         exit()
 
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+    cap.set(cv2.CAP_PROP_FPS, 15)
+
     return model, cap
 
 def main():
@@ -61,7 +65,7 @@ def main():
         if conf.skip_frames != 0 and count % conf.skip_frames != 0:
             continue
 
-        #frame = cv2.resize(frame, (600, 480))
+        #frame = cv2.resize(frame, (320, 240))
 
         results=model.predict(frame, verbose = False)
         
@@ -80,7 +84,8 @@ def main():
 
 model_ref = input("Insert the Ultralytics model string: ")
 skip_frames = int(input("Pick a number of frames to skip: "))
+fps = int(input("Pick a number of fps for the camera: "))
 
-conf = Conf(camera = 0, distance = 120, skip_frames = skip_frames, model = model_ref, confidence = 0.5, font_color = (255, 255, 255), font_thickness = 3)
+conf = Conf(fps = fps, camera = 0, distance = 120, skip_frames = skip_frames, model = model_ref, confidence = 0.5, font_color = (255, 255, 255), font_thickness = 3)
 
 main()
