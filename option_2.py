@@ -72,6 +72,9 @@ def main():
     cap.release()
     cv2.destroyAllWindows()
 
-conf = Conf(camera = 0, distance = 120, skip_frames = 0, model = 'yolov8s.pt', confidence = 0.5, font_color = (255, 255, 255), font_thickness = 3)
+model_ref = input("Insert the Ultralytics model string")
+skip_frames = int("Pick a number of frames to skip")
+
+conf = Conf(camera = 0, distance = 120, skip_frames = skip_frames, model = model_ref, confidence = 0.5, font_color = (255, 255, 255), font_thickness = 3)
 
 main()
