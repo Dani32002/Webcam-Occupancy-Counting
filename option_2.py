@@ -3,6 +3,9 @@ import pandas as pd
 from ultralytics import YOLO
 from common import Conf
 
+cv2.setUseOptimized(True)
+cv2.setNumThreads(4)
+
 def get_coords_conf(results):
 
     data = results[0].boxes.data.numpy().tolist()
